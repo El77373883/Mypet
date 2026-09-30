@@ -1,0 +1,25 @@
+messages:
+  prefix: "§8[§6Mypet§8] §r"
+  pet-created: "§a¡Has creado tu mascota §e%pet_name%§a!"
+  pet-removed: "§cTu mascota ha sido eliminada."
+  pet-renamed: "§aTu mascota ahora se llama §e%pet_name%§a."
+  pet-not-found: "§cNo tienes una mascota activa."
+  already-has-pet: "§cYa tienes una mascota. Usa /mypet gui."
+  invalid-mob: "§cEse mob no es válido."
+
+announcements:
+  enabled: true
+  interval-seconds: 300
+  sound:
+    enabled: true
+    sound-name: "BLOCK_NOTE_BLOCK_PLING"
+    volume: 1.0
+    pitch: 1.5
+  messages:
+    - "§6§l[Mypet] §r§e¡Gestiona tus mascotas con §f/mypet gui§e!"
+    - "§6§l[Mypet] §r§ePlugin creado por §fsoyadrianyt001§e - Versión 1.0"
+
+pets:
+  max-per-player: 1
+  follow-distance: 10
+  teleport-distance: 25
