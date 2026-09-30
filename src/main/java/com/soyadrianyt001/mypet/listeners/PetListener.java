@@ -4,6 +4,7 @@ import com.soyadrianyt001.mypet.Mypet;
 import com.soyadrianyt001.mypet.data.PetData;
 import com.soyadrianyt001.mypet.gui.PetGui;
 import com.soyadrianyt001.mypet.managers.PetManager;
+import com.soyadrianyt001.mypet.managers.PetTalk;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -60,6 +61,7 @@ public class PetListener implements Listener {
     }
 
     private final Mypet plugin;
+    private final PetTalk talk;
     private final Map<UUID, Hit> lastHit = new HashMap<>();
     private final Map<UUID, Hit> lastOwnerHit = new HashMap<>();
     private final Map<UUID, Long> lastAttack = new HashMap<>();
@@ -69,6 +71,7 @@ public class PetListener implements Listener {
 
     public PetListener(Mypet plugin) {
         this.plugin = plugin;
+        this.talk = new PetTalk(plugin);
         // por si el plugin se recarga con jugadores conectados
         Bukkit.getScheduler().runTask(plugin, () -> {
             for (Player p : Bukkit.getOnlinePlayers()) pm().spawnPet(p);
@@ -136,6 +139,7 @@ public class PetListener implements Listener {
         if (!busy && d.isFollowEnabled() && dist > 4.0) {
             pet.getPathfinder().moveTo(ol, 1.25);
         }
+        talk.tick(pm, owner, d, pet);
         if (tickCount % 120 == 0) pm.addXp(owner, d, plugin.getConfig().getInt("pets.passive-xp-per-minute", 2));
     }
 
@@ -371,6 +375,7 @@ public class PetListener implements Listener {
         lastAttack.remove(id);
         lastWork.remove(id);
         lastRespawn.remove(id);
+        talk.forget(id);
     }
 
     // =================================================== anti-bugs
