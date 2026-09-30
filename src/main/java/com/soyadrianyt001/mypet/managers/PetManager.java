@@ -35,9 +35,6 @@ public class PetManager {
     private static final MiniMessage MM = MiniMessage.miniMessage();
     private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacyAmpersand();
     private static final Pattern NAME = Pattern.compile("[\\p{L}\\p{N}_ ]{2,16}");
-    private static final List<String> DEFAULT_MOBS = List.of(
-            "COW", "PIG", "SHEEP", "CHICKEN", "WOLF", "CAT", "RABBIT", "FOX", "PANDA",
-            "PARROT", "HORSE", "LLAMA", "AXOLOTL", "GOAT", "MOOSHROOM");
 
     private final Mypet plugin;
     private final File file;
@@ -87,11 +84,14 @@ public class PetManager {
 
     // ------------------------------------------------------------ consultas
 
+    /** Todos los mobs del juego (zombies, esqueletos, golems, dragón...). */
     public List<String> allowedMobs() {
-        List<String> src = plugin.getConfig().getStringList("pets.allowed-mobs");
-        if (src.isEmpty()) src = DEFAULT_MOBS;
         List<String> out = new ArrayList<>();
-        for (String s : src) out.add(s.toUpperCase(Locale.ROOT));
+        for (EntityType t : EntityType.values()) {
+            if (t.getEntityClass() != null && Mob.class.isAssignableFrom(t.getEntityClass())) {
+                out.add(t.name());
+            }
+        }
         return out;
     }
 
