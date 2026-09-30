@@ -2,7 +2,7 @@ plugins {
     java
 }
 
-group = "com.soyadrianyt001"
+group = "dev.mypets"
 version = "1.0"
 
 repositories {
@@ -11,32 +11,10 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
-}
-
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
-}
-
-sourceSets {
-    main {
-        java {
-            srcDirs("src/main/java")
-        }
-        resources {
-            srcDirs("src/main/resources")
-        }
-    }
+    compileOnly("io.papermc.paper:paper-api:26.2.build.+")
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-}
-
-tasks.jar {
-    archiveFileName.set("Mypet-1.0.jar")
-    destinationDirectory.set(file("$buildDir/libs"))
-    manifest {
-        attributes["Main-Class"] = "com.soyadrianyt001.mypet.Mypet"
-    }
+    options.release.set(25)
 }
