@@ -1,4 +1,6 @@
-package com.soyadrianyt001.mimport com.soyadrianyt001.mypet.Mypet;
+package com.soyadrianyt001.mypet.managers;
+
+import com.soyadrianyt001.mypet.Mypet;
 import org.bukkit.Sound;
 import org.bukkit.scheduler.BukkitTask;
 
