@@ -1,20 +1,27 @@
 package com.soyadrianyt001.mypet.commands;
 
 import com.soyadrianyt001.mypet.Mypet;
+import com.soyadrianyt001.mypet.data.PetData;
 import com.soyadrianyt001.mypet.gui.PetGui;
-import org.bukkit.ChatColor;
+import com.soyadrianyt001.mypet.managers.PetManager;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class MyPetCommand implements CommandExecutor, TabCompleter {
+
+    private static final MiniMessage MM = MiniMessage.miniMessage();
+    private static final List<String> SUBS = List.of(
+            "create", "gui", "remove", "rename", "follow", "call", "attack", "job", "info", "creator", "help");
 
     private final Mypet plugin;
 
@@ -23,91 +30,94 @@ public class MyPetCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
+                             @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatColor.RED + "Solo jugadores pueden usar este comando.");
+            sender.sendMessage("Solo jugadores pueden usar este comando.");
             return true;
         }
-
+        PetManager pm = plugin.getPetManager();
         if (args.length == 0) {
             sendHelp(player);
             return true;
         }
 
-        switch (args[0].toLowerCase()) {
-            case "create":
+        switch (args[0].toLowerCase(Locale.ROOT)) {
+            case "create", "crear" -> {
                 if (args.length >= 3) {
-                    String mobType = args[1];
-                    String petName = String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length));
-                    plugin.getPetManager().createPet(player, mobType, petName);
+                    String name = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+                    pm.createPet(player, args[1], name);
                 } else {
-                    player.sendMessage(ChatColor.RED + "Uso: /mypet create <mob> <nombre>");
-                    player.sendMessage(ChatColor.GRAY + "Ejemplo: /mypet create wolf Rocky");
+                    pm.err(player, "Uso: /mypet create <mob> <nombre>  (ej: /mypet create wolf Rocky)");
                 }
-                break;
-
-            case "gui":
-            case "menu":
-                PetGui.openMainMenu(player);
-                break;
-
-            case "creator":
-                player.sendMessage(ChatColor.GOLD + "§l=== Mypet ===");
-                player.sendMessage(ChatColor.YELLOW + "Creador: §fsoyadrianyt001");
-                player.sendMessage(ChatColor.YELLOW + "Versión: §f1.0");
-                player.sendMessage(ChatColor.YELLOW + "Plugin profesional de mascotas");
-                player.sendMessage(ChatColor.GOLD + "=================");
-                break;
-
-            case "remove":
-            case "delete":
-                plugin.getPetManager().removePet(player);
-                break;
-
-            case "rename":
+            }
+            case "gui", "menu" -> PetGui.openMainMenu(player);
+            case "remove", "delete", "eliminar" -> pm.removePet(player);
+            case "rename", "nombre" -> {
                 if (args.length >= 2) {
-                    String newName = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
-                    plugin.getPetManager().renamePet(player, newName);
+                    pm.renamePet(player, String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
                 } else {
-                    player.sendMessage(ChatColor.RED + "Uso: /mypet rename <nuevo_nombre>");
+                    pm.err(player, "Uso: /mypet rename <nuevo_nombre>");
                 }
-                break;
-
-            case "help":
-            default:
-                sendHelp(player);
-                break;
+            }
+            case "follow", "seguir" -> pm.toggleFollow(player);
+            case "call", "llamar" -> pm.callPet(player);
+            case "attack", "atacar" -> {
+                PetData.AttackMode m = args.length > 1 ? PetData.AttackMode.parse(args[1]) : null;
+                if (m == null) pm.err(player, "Uso: /mypet attack <on|defend|off>");
+                else pm.setAttackMode(player, m);
+            }
+            case "job", "trabajo" -> {
+                String job = args.length > 1 ? PetManager.normalizeJob(args[1]) : null;
+                if (job == null) pm.err(player, "Uso: /mypet job <none|collector|farmer|miner>");
+                else pm.setJob(player, job);
+            }
+            case "info" -> pm.sendInfo(player);
+            case "creator" -> {
+                player.sendMessage(MM.deserialize("<gold><bold>=== Mypet ==="));
+                player.sendMessage(MM.deserialize("<yellow>Creador: <white>soyadrianyt001"));
+                player.sendMessage(MM.deserialize("<yellow>Versión: <white>1.0"));
+                player.sendMessage(MM.deserialize("<yellow>Plugin profesional de mascotas"));
+            }
+            default -> sendHelp(player);
         }
         return true;
     }
 
-    private void sendHelp(Player player) {
-        player.sendMessage(ChatColor.GOLD + "§l=== Mypet - Comandos ===");
-        player.sendMessage(ChatColor.YELLOW + "/mypet create <mob> <nombre> §7- Crear mascota");
-        player.sendMessage(ChatColor.YELLOW + "/mypet gui §7- Abrir menú de gestión");
-        player.sendMessage(ChatColor.YELLOW + "/mypet remove §7- Eliminar mascota");
-        player.sendMessage(ChatColor.YELLOW + "/mypet rename <nombre> §7- Renombrar mascota");
-        player.sendMessage(ChatColor.YELLOW + "/mypet creator §7- Información del plugin");
-        player.sendMessage(ChatColor.GOLD + "=============================");
+    private void sendHelp(Player p) {
+        p.sendMessage(MM.deserialize("<gold><bold>=== Mypet · Comandos ==="));
+        String[] lines = {
+                "/mypet create <mob> <nombre> <gray>- crear mascota",
+                "/mypet gui <gray>- abrir el menú",
+                "/mypet rename <nombre> <gray>- renombrar",
+                "/mypet remove <gray>- eliminar",
+                "/mypet follow <gray>- seguir / quedarse",
+                "/mypet call <gray>- llamar a tu mascota",
+                "/mypet attack <on|defend|off> <gray>- modo de combate",
+                "/mypet job <none|collector|farmer|miner> <gray>- trabajo",
+                "/mypet info <gray>- nivel y estado"
+        };
+        for (String l : lines) p.sendMessage(MM.deserialize("<yellow>" + l));
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        List<String> completions = new ArrayList<>();
-
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+                                      @NotNull String alias, @NotNull String[] args) {
+        List<String> options = new ArrayList<>();
         if (args.length == 1) {
-            completions.addAll(List.of("create", "gui", "remove", "rename", "creator", "help"));
-        } else if (args.length == 2 && args[0].equalsIgnoreCase("create")) {
-            for (EntityType type : EntityType.values()) {
-                if (type.isSpawnable() && type.getEntityClass() != null &&
-                    org.bukkit.entity.Mob.class.isAssignableFrom(type.getEntityClass())) {
-                    completions.add(type.name().toLowerCase());
+            options.addAll(SUBS);
+        } else if (args.length == 2) {
+            switch (args[0].toLowerCase(Locale.ROOT)) {
+                case "create", "crear" -> {
+                    for (String m : plugin.getPetManager().allowedMobs()) options.add(m.toLowerCase(Locale.ROOT));
+                }
+                case "attack", "atacar" -> options.addAll(List.of("on", "defend", "off"));
+                case "job", "trabajo" -> options.addAll(List.of("none", "collector", "farmer", "miner"));
+                default -> {
                 }
             }
         }
-
-        return completions.stream()
-                .filter(s -> s.toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
-                .toList();
+        String typed = args[args.length - 1].toLowerCase(Locale.ROOT);
+        return options.stream().filter(s -> s.startsWith(typed)).toList();
     }
 }
