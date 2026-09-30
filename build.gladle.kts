@@ -20,12 +20,8 @@ java {
 
 sourceSets {
     main {
-        java {
-            srcDirs("src/main/java")
-        }
-        resources {
-            srcDirs("src/main/resources")
-        }
+        java.srcDirs("src/main/java")
+        resources.srcDirs("src/main/resources")
     }
 }
 
@@ -35,8 +31,5 @@ tasks.withType<JavaCompile> {
 
 tasks.jar {
     archiveFileName.set("Mypet-1.0.jar")
-    destinationDirectory.set(file("build/libs"))
-    manifest {
-        attributes["Main-Class"] = "com.soyadrianyt001.mypet.Mypet"
-    }
+    destinationDirectory.set(file("$buildDir/libs"))
 }
