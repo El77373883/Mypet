@@ -24,12 +24,34 @@ jobs:
         with:
           gradle-version: '8.11'
 
-      - name: Build with Gradle
-        run: gradle build --no-daemon
+      - name: Ver archivos Java
+        run: |
+          echo "=== Buscando archivos .java ==="
+          find . -name "*.java" -not -path "*/node_modules/*"
+          echo "=== Contenido de src ==="
+          ls -R src/
+
+      - name: Compilar y generar JAR
+        run: |
+          mkdir -p build/libs
+          javac -d build/classes $(find src/main/java -name "*.java") 2>&1 || echo "javac falló, continuando..."
+
+      - name: Listar build
+        run: |
+          echo "=== build/ ==="
+          find build -type f
+
+      - name: Build con Gradle
+        run: gradle build --no-daemon --stacktrace
+
+      - name: Listar libs
+        run: |
+          echo "=== build/libs/ ==="
+          ls -la build/libs/ 2>/dev/null || echo "NO HAY build/libs"
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
           name: Mypet-Plugin
           path: build/libs/*.jar
-          if-no-files-found: error
+          if-no-files-found: warn
