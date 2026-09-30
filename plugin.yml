@@ -1,0 +1,12 @@
+name: Mypet
+version: 1.0
+main: com.soyadrianyt001.mypet.Mypet
+api-version: '26.2'
+description: Sistema profesional de mascotas para Paper
+author: soyadrianyt001
+
+commands:
+  mypet:
+    description: Comando principal de Mypet
+    usage: /mypet <create|gui|creator|help>
+    aliases: [mascota, pets]
