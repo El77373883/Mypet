@@ -25,7 +25,7 @@ public class PetData {
     private UUID petUUID;
     private final EntityType entityType;
     private String petName;
-    private AttackMode attackMode = AttackMode.ON;
+    private AttackMode attackMode = AttackMode.DEFEND;
     private boolean followEnabled = true;
     private String currentJob = "none";
     private long xp;
