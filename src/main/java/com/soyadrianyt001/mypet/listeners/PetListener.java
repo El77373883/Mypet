@@ -61,6 +61,7 @@ public class PetListener implements Listener {
 
     private final Mypet plugin;
     private final Map<UUID, Hit> lastHit = new HashMap<>();
+    private final Map<UUID, Hit> lastOwnerHit = new HashMap<>();
     private final Map<UUID, Long> lastAttack = new HashMap<>();
     private final Map<UUID, Long> lastWork = new HashMap<>();
     private final Map<UUID, Long> lastRespawn = new HashMap<>();
@@ -145,10 +146,15 @@ public class PetListener implements Listener {
         LivingEntity target = null;
 
         if (d.getAttackMode() == PetData.AttackMode.DEFEND) {
-            Hit h = lastHit.get(owner.getUniqueId());
+            // ataca a quien golpeó al dueño, o a quien el dueño golpeó
+            UUID id = owner.getUniqueId();
+            Hit h = newest(lastHit.get(id), lastOwnerHit.get(id));
+            boolean pvp = plugin.getConfig().getBoolean("pets.attack.pvp", false);
             if (h != null && System.currentTimeMillis() - h.time() < 10_000) {
                 Entity e = Bukkit.getEntity(h.target());
                 if (e instanceof LivingEntity le && le.isValid() && !le.isDead()
+                        && !le.getUniqueId().equals(id) && !pm.isPet(le)
+                        && (pvp || !(le instanceof Player))
                         && le.getWorld().equals(pet.getWorld())
                         && le.getLocation().distanceSquared(owner.getLocation()) <= r * r * 4) {
                     target = le;
@@ -188,16 +194,36 @@ public class PetListener implements Listener {
         return true;
     }
 
-    /** Recuerda quién golpeó al dueño (para el modo Defender). */
+    private static Hit newest(Hit a, Hit b) {
+        if (a == null) return b;
+        if (b == null) return a;
+        return a.time() >= b.time() ? a : b;
+    }
+
+    /** Registra combates del dueño y evita que la mascota lo dañe. */
     @EventHandler(ignoreCancelled = true)
-    public void onOwnerHurt(EntityDamageByEntityEvent e) {
-        if (!(e.getEntity() instanceof Player p)) return;
+    public void onCombat(EntityDamageByEntityEvent e) {
+        Entity victim = e.getEntity();
         Entity damager = e.getDamager();
         if (damager instanceof Projectile proj && proj.getShooter() instanceof Entity shooter) {
             damager = shooter;
         }
-        if (damager instanceof LivingEntity && !(damager instanceof Player) && !pm().isPet(damager)) {
-            lastHit.put(p.getUniqueId(), new Hit(damager.getUniqueId(), System.currentTimeMillis()));
+        long now = System.currentTimeMillis();
+
+        // la mascota nunca daña a su dueño
+        if (pm().isPet(damager) && victim.getUniqueId().equals(pm().getOwnerId(damager))) {
+            e.setCancelled(true);
+            return;
+        }
+        // alguien golpeó al dueño
+        if (victim instanceof Player owner) {
+            if (damager instanceof LivingEntity && !(damager instanceof Player) && !pm().isPet(damager)) {
+                lastHit.put(owner.getUniqueId(), new Hit(damager.getUniqueId(), now));
+            }
+        }
+        // el dueño golpeó a alguien
+        if (damager instanceof Player attacker && victim instanceof LivingEntity && !pm().isPet(victim)) {
+            lastOwnerHit.put(attacker.getUniqueId(), new Hit(victim.getUniqueId(), now));
         }
     }
 
@@ -341,6 +367,7 @@ public class PetListener implements Listener {
         pm().saveIfDirty();
         UUID id = p.getUniqueId();
         lastHit.remove(id);
+        lastOwnerHit.remove(id);
         lastAttack.remove(id);
         lastWork.remove(id);
         lastRespawn.remove(id);
