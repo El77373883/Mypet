@@ -134,7 +134,10 @@ public class PetManager {
     }
 
     public Component displayName(PetData d) {
-        return MM.deserialize("<dark_gray>[" + d.getRankColor() + d.getRankName() + "<dark_gray>] <gold>"
+        String owner = Bukkit.getOfflinePlayer(d.getOwnerUUID()).getName();
+        if (owner == null) owner = "???";
+        return MM.deserialize("<aqua>Mascota de <white>" + MM.escapeTags(owner)
+                + " <dark_gray>| <dark_gray>[" + d.getRankColor() + d.getRankName() + "<dark_gray>] <gold>"
                 + MM.escapeTags(d.getPetName()) + " <yellow>Nv." + d.getLevel());
     }
 
