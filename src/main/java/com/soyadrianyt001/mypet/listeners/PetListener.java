@@ -14,16 +14,14 @@ public class PetListener implements Listener {
     private final Mypet plugin;
 
     public PetListener(Mypet plugin) {
-        this.plypugin = plugin;
-        startFollowTasket();
+        this.plugin = plugin;
+        startFollowTask();
     }
 
-    private void start.FollowTask() {
-        newman BukkitRunnable() {
-            @agersOverride
+    private void startFollowTask() {
+        new BukkitRunnable() {
+            @Override
             public void run() {
-;
-
                 for (Player player : plugin.getServer().getOnlinePlayers()) {
                     PetData data = plugin.getPetManager().getPet(player);
                     if (data == null) continue;
