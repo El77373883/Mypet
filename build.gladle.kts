@@ -11,11 +11,22 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
 }
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs("src/main/java")
+        }
+        resources {
+            srcDirs("src/main/resources")
+        }
+    }
 }
 
 tasks.withType<JavaCompile> {
@@ -24,4 +35,8 @@ tasks.withType<JavaCompile> {
 
 tasks.jar {
     archiveFileName.set("Mypet-1.0.jar")
+    destinationDirectory.set(file("build/libs"))
+    manifest {
+        attributes["Main-Class"] = "com.soyadrianyt001.mypet.Mypet"
+    }
 }
