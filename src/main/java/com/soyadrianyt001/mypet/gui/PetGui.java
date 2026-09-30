@@ -60,10 +60,10 @@ public final class PetGui {
         }
     }
 
-    private record Mob(String id, String label, Material egg) {
+    private record Mob(String id, String label, Material icon) {
     }
 
-    /** Lista de mascotas del selector. Edítala a tu gusto. */
+    /** Lista de mascotas del selector (máximo 28). Edítala a tu gusto. */
     private static final List<Mob> MOBS = List.of(
             new Mob("cow", "Vaca", Material.COW_SPAWN_EGG),
             new Mob("pig", "Cerdo", Material.PIG_SPAWN_EGG),
@@ -78,9 +78,27 @@ public final class PetGui {
             new Mob("horse", "Caballo", Material.HORSE_SPAWN_EGG),
             new Mob("llama", "Llama", Material.LLAMA_SPAWN_EGG),
             new Mob("axolotl", "Ajolote", Material.AXOLOTL_SPAWN_EGG),
-            new Mob("goat", "Cabra", Material.GOAT_SPAWN_EGG));
+            new Mob("goat", "Cabra", Material.GOAT_SPAWN_EGG),
+            new Mob("mooshroom", "Vaca hongo", Material.MOOSHROOM_SPAWN_EGG),
+            new Mob("bee", "Abeja", Material.BEE_SPAWN_EGG),
+            new Mob("camel", "Camello", Material.CAMEL_SPAWN_EGG),
+            new Mob("zombie", "Zombie", Material.ZOMBIE_SPAWN_EGG),
+            new Mob("skeleton", "Esqueleto", Material.SKELETON_SPAWN_EGG),
+            new Mob("creeper", "Creeper", Material.CREEPER_SPAWN_EGG),
+            new Mob("spider", "Araña", Material.SPIDER_SPAWN_EGG),
+            new Mob("enderman", "Enderman", Material.ENDERMAN_SPAWN_EGG),
+            new Mob("blaze", "Blaze", Material.BLAZE_SPAWN_EGG),
+            new Mob("slime", "Slime", Material.SLIME_SPAWN_EGG),
+            new Mob("witch", "Bruja", Material.WITCH_SPAWN_EGG),
+            new Mob("iron_golem", "Golem de hierro", Material.IRON_BLOCK),
+            new Mob("snow_golem", "Golem de nieve", Material.CARVED_PUMPKIN),
+            new Mob("ender_dragon", "Dragón", Material.DRAGON_HEAD));
 
-    private static final int[] MOB_SLOTS = {19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34};
+    private static final int[] MOB_SLOTS = {
+            10, 11, 12, 13, 14, 15, 16,
+            19, 20, 21, 22, 23, 24, 25,
+            28, 29, 30, 31, 32, 33, 34,
+            37, 38, 39, 40, 41, 42, 43};
 
     // ------------------------------------------------------------------ API
 
@@ -131,7 +149,7 @@ public final class PetGui {
                 "<yellow>▶ Click para configurar"), "open:MODE");
         put(h, 31, item(Material.IRON_PICKAXE, "<gold><bold>✦ Trabajos", false,
                 "<gray>Asigna un trabajo: recolectar,",
-                "<gray>cultivar, minar, pescar...",
+                "<gray>cultivar o minar.",
                 "",
                 "<yellow>▶ Click para elegir"), "open:JOBS");
         put(h, 33, item(Material.LEAD, "<light_purple><bold>✦ Seguir / Quedarse", false,
@@ -161,7 +179,7 @@ public final class PetGui {
         Holder h = make(6, "<gradient:#11998e:#38ef7d><bold>✦ Elige tu Mascota ✦</bold></gradient>");
         for (int i = 0; i < MOBS.size() && i < MOB_SLOTS.length; i++) {
             Mob m = MOBS.get(i);
-            put(h, MOB_SLOTS[i], item(m.egg(), "<green><bold>" + m.label(), false,
+            put(h, MOB_SLOTS[i], item(m.icon(), "<green><bold>" + m.label(), false,
                     "<gray>Tipo: <white>" + m.label(),
                     "",
                     "<yellow>▶ Click para elegirla",
@@ -193,11 +211,9 @@ public final class PetGui {
 
     private static void jobs(Player p) {
         Holder h = make(5, "<gradient:#f7971e:#ffd200><bold>✦ Trabajos ✦</bold></gradient>");
-        job(h, 19, Material.HOPPER, "Recolector", "collector", "Recoge los ítems del suelo.");
-        job(h, 20, Material.GOLDEN_HOE, "Granjero", "farmer", "Cosecha y replanta cultivos.");
-        job(h, 22, Material.IRON_PICKAXE, "Minero", "miner", "Busca minerales cercanos.");
-        job(h, 24, Material.FISHING_ROD, "Pescador", "fisher", "Pesca cuando hay agua cerca.");
-        job(h, 25, Material.SHIELD, "Guardián", "guard", "Vigila y ataca amenazas.");
+        job(h, 20, Material.HOPPER, "Recolector", "collector", "Recoge los ítems del suelo.");
+        job(h, 22, Material.GOLDEN_HOE, "Granjero", "farmer", "Cosecha y replanta cultivos.");
+        job(h, 24, Material.IRON_PICKAXE, "Minero", "miner", "Busca minerales cercanos.");
         put(h, 31, item(Material.RED_BED, "<gray><bold>Descansar", false,
                 "<gray>Sin trabajo, solo te acompaña.",
                 "",
